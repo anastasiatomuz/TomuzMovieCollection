@@ -12,6 +12,14 @@ public class Actor {
 
     public void addMovie(Movie movieToAdd){
         moviesStarred.add(movieToAdd);
-        MovieCollection.sortResults(moviesStarred);
+        MovieCollection.sortResultsMovies(moviesStarred);
+    }
+
+    public ArrayList getMoviesStarred(){
+        return moviesStarred;
+    }
+
+    public String getName(){
+        return name;
     }
 }

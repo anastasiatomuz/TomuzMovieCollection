@@ -8,10 +8,14 @@ public class MovieCollection {
   private ArrayList<Movie> movies;
   private Scanner scanner;
 
+  private ArrayList<Actor> listOfAllActors;
+
 
   public MovieCollection(String fileName) {
     importMovieList(fileName);
     scanner = new Scanner(System.in);
+    this.listOfAllActors = new ArrayList<Actor>();
+    createActorList();
   }
 
   public ArrayList<Movie> getMovies() {
@@ -121,7 +125,7 @@ public class MovieCollection {
 
     if (results.size() > 0) {
       // sort the results by title
-      sortResults(results);
+      sortResultsMovies(results);
 
       // now, display them all to the user
       for (int i = 0; i < results.size(); i++) {
@@ -147,7 +151,7 @@ public class MovieCollection {
     }
   }
 
-  public static void sortResults(ArrayList<Movie> listToSort) {
+  public static void sortResultsMovies(ArrayList<Movie> listToSort) {
     for (int j = 1; j < listToSort.size(); j++) {
       Movie temp = listToSort.get(j);
       String tempTitle = temp.getTitle();
@@ -160,6 +164,21 @@ public class MovieCollection {
       listToSort.set(possibleIndex, temp);
     }
   }
+
+  public static void sortResultsActors(ArrayList<Actor> listToSort) {
+    for (int j = 1; j < listToSort.size(); j++) {
+      Actor temp = listToSort.get(j);
+      String tempTitle = temp.getName();
+
+      int possibleIndex = j;
+      while (possibleIndex > 0 && tempTitle.compareTo(listToSort.get(possibleIndex - 1).getName()) < 0) {
+        listToSort.set(possibleIndex, listToSort.get(possibleIndex - 1));
+        possibleIndex--;
+      }
+      listToSort.set(possibleIndex, temp);
+    }
+  }
+
   
   private void displayMovieInfo(Movie movie) {
     System.out.println();
@@ -191,7 +210,7 @@ public class MovieCollection {
     }
 
     if (results.size() > 0){
-      sortResults(results);
+      sortResultsMovies(results);
       for (int i = 0; i < results.size(); i ++){
         System.out.println(i + 1 + ". " + results.get(i).getTitle());
       }
@@ -215,11 +234,48 @@ public class MovieCollection {
     System.out.print("Enter a person to search for (first or last name): ");
     String userKey = scanner.nextLine().toLowerCase();
 
-    ArrayList<M>
-    String actors = "Ryan Reynolds|Josh Brolin|Gina Carano|T.J. Miller";
-    String[] actorList = actors.split("\\|");
+    ArrayList<Actor> resultsNames = new ArrayList<>();
 
+    for (Actor currentActor : listOfAllActors) {
+      if (currentActor.getName().contains(userKey)) {
+        resultsNames.add(currentActor);
+      }
+    }
+    if (resultsNames.size() != 0) {
+
+      for (int i = 0; i < resultsNames.size(); i++) {
+        System.out.println(i + 1 + ". " + resultsNames.get(i).getName());
+      }
+
+      System.out.println("Which actor would you like to learn more about?");
+      System.out.print("Enter number: ");
+      int choice = scanner.nextInt();
+      scanner.nextLine();
+      Actor actorToView = resultsNames.get(choice - 1);
+
+      ArrayList<Movie> moviesStarred = actorToView.getMoviesStarred();
+      System.out.println();
+
+      for (int i = 0; i < moviesStarred.size(); i++) {
+        System.out.println(i + 1 + ". " + moviesStarred.get(i).getTitle());
+      }
+
+      System.out.println("Which movie would you like to learn more about?");
+      System.out.print("Enter number: ");
+      int choiceMovie = scanner.nextInt();
+      scanner.nextLine();
+      Movie toView = moviesStarred.get(choiceMovie - 1);
+      displayMovieInfo(toView);
+      System.out.println("\n ** Press Enter to Return to Main Menu **");
+      scanner.nextLine();
+    } else {
+      System.out.println("\nNo actors match that search term!");
+      System.out.println("** Press Enter to Return to Main Menu **");
+      scanner.nextLine();
+    }
   }
+
+
   
   private void listGenres() {
     /* TASK 5: IMPLEMENT ME */
@@ -231,5 +287,44 @@ public class MovieCollection {
   
   private void listHighestRevenue() {
     /* TASK 6: IMPLEMENT ME */
+  }
+
+  /*
+  a one-time method for creating a list of all actors that appear in all movies in the database
+  each actor object will have the movies they starred in
+   */
+  private void createActorList(){
+    for (int i = 0; i < movies.size(); i ++)
+    {
+      Movie currentMovie = movies.get(i);
+      String actors = currentMovie.getCast();
+      String[] currentMovieCast = actors.split("\\|");
+      for (String actorName : currentMovieCast)
+      {
+        //only for the first movie, create Actor objects for all the cast
+        if (i == 0)
+        {
+          listOfAllActors.add(new Actor(actorName, currentMovie));
+        }
+        else
+        {
+          for (int j = 0; i < listOfAllActors.size(); j++)
+          {
+            //if there's already an Actor object created, add the currentMovie to moviesStarred for the actor
+            //System.out.println("j: " + j + " listOfAllActors: " + listOfAllActors);
+            if (listOfAllActors.get(j).getName().equals(actorName))
+            {
+              listOfAllActors.get(j).addMovie(currentMovie);
+            }
+            //if actor isn't on the actor list, create a new actor object
+            else {
+              listOfAllActors.add(new Actor(actorName, currentMovie));
+              j--;
+            }
+          }
+        }
+      }
+      sortResultsActors(listOfAllActors);
+    }
   }
 }
