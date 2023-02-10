@@ -9,6 +9,7 @@ public class MovieCollection {
   private Scanner scanner;
 
   private ArrayList<Actor> listOfAllActors;
+  private ArrayList<Genre> listOfAllGenre;
 
 
   public MovieCollection(String fileName) {
@@ -16,6 +17,8 @@ public class MovieCollection {
     scanner = new Scanner(System.in);
     this.listOfAllActors = new ArrayList<Actor>();
     createActorList();
+    this.listOfAllGenre = new ArrayList<>();
+    createGenreList();
   }
 
   public ArrayList<Movie> getMovies() {
@@ -165,9 +168,23 @@ public class MovieCollection {
     }
   }
 
-  public static void sortResultsActors(ArrayList<Actor> listToSort) {
+  private void sortResultsActors(ArrayList<Actor> listToSort) {
     for (int j = 1; j < listToSort.size(); j++) {
       Actor temp = listToSort.get(j);
+      String tempTitle = temp.getName();
+
+      int possibleIndex = j;
+      while (possibleIndex > 0 && tempTitle.compareTo(listToSort.get(possibleIndex - 1).getName()) < 0) {
+        listToSort.set(possibleIndex, listToSort.get(possibleIndex - 1));
+        possibleIndex--;
+      }
+      listToSort.set(possibleIndex, temp);
+    }
+  }
+
+  private void sortResultsGenre(ArrayList<Genre> listToSort) {
+    for (int j = 1; j < listToSort.size(); j++) {
+      Genre temp = listToSort.get(j);
       String tempTitle = temp.getName();
 
       int possibleIndex = j;
@@ -237,7 +254,7 @@ public class MovieCollection {
     ArrayList<Actor> resultsNames = new ArrayList<>();
 
     for (Actor currentActor : listOfAllActors) {
-      if (currentActor.getName().contains(userKey)) {
+      if (currentActor.getName().toLowerCase().contains(userKey)) {
         resultsNames.add(currentActor);
       }
     }
@@ -278,11 +295,71 @@ public class MovieCollection {
 
   
   private void listGenres() {
-    /* TASK 5: IMPLEMENT ME */
+
+    for (int i = 0; i < listOfAllGenre.size(); i++) {
+      System.out.println(i + 1 + ". " + listOfAllGenre.get(i).getName());
+    }
+
+    System.out.println("Which genre would you like to look at?");
+    System.out.print("Enter number: ");
+    int choice = scanner.nextInt();
+    scanner.nextLine();
+    Genre genreToView = listOfAllGenre.get(choice - 1);
+
+    ArrayList<Movie> moviesWithCurrentGenre = genreToView.getMoviesWithGenre();
+    System.out.println();
+
+    for (int i = 0; i < moviesWithCurrentGenre.size(); i++) {
+      System.out.println(i + 1 + ". " + moviesWithCurrentGenre.get(i).getTitle());
+    }
+
+    System.out.println("Which movie would you like to learn more about?");
+    System.out.print("Enter number: ");
+    int choiceMovie = scanner.nextInt();
+    scanner.nextLine();
+    Movie toView = moviesWithCurrentGenre.get(choiceMovie - 1);
+    displayMovieInfo(toView);
+    System.out.println("\n ** Press Enter to Return to Main Menu **");
+    scanner.nextLine();
+
   }
   
   private void listHighestRated() {
-    /* TASK 6: IMPLEMENT ME */
+    ArrayList<Movie> results = new ArrayList<>();
+    for (Movie movie : movies){
+      results.add(movie);
+    }
+
+    for (int j = 1; j < results.size(); j++) {
+      Movie temp = results.get(j);
+      double tempRating = temp.getUserRating();
+
+      int possibleIndex = j;
+      while (possibleIndex > 0 && tempRating > results.get(possibleIndex - 1).getUserRating()) {
+        results.set(possibleIndex, results.get(possibleIndex - 1));
+        possibleIndex--;
+      }
+      results.set(possibleIndex, temp);
+    }
+
+    ArrayList<Movie> newLimitedResults = new ArrayList<>();
+    for (int k = 0; k < 50; k ++){
+      newLimitedResults.add(results.get(k));
+    }
+
+    for (int i = 0; i < newLimitedResults.size(); i++) {
+      System.out.println(i + 1 + ". " + newLimitedResults.get(i).getTitle() + " " + newLimitedResults.get(i).getUserRating());
+    }
+
+    System.out.println("Which movie would you like to learn more about?");
+    System.out.print("Enter number: ");
+    int choiceMovie = scanner.nextInt();
+    scanner.nextLine();
+    Movie toView = newLimitedResults.get(choiceMovie - 1);
+    displayMovieInfo(toView);
+    System.out.println("\n ** Press Enter to Return to Main Menu **");
+    scanner.nextLine();
+
   }
   
   private void listHighestRevenue() {
@@ -308,23 +385,62 @@ public class MovieCollection {
         }
         else
         {
-          for (int j = 0; i < listOfAllActors.size(); j++)
+          boolean added = false;
+          for (int j = 0; j < listOfAllActors.size(); j++)
           {
             //if there's already an Actor object created, add the currentMovie to moviesStarred for the actor
-            //System.out.println("j: " + j + " listOfAllActors: " + listOfAllActors);
             if (listOfAllActors.get(j).getName().equals(actorName))
             {
               listOfAllActors.get(j).addMovie(currentMovie);
+              added = true;
             }
-            //if actor isn't on the actor list, create a new actor object
-            else {
-              listOfAllActors.add(new Actor(actorName, currentMovie));
-              j--;
-            }
+          }
+          //if actor isn't on the actor list, create a new actor object
+          if (!added)
+          {
+            listOfAllActors.add(new Actor(actorName, currentMovie));
           }
         }
       }
-      sortResultsActors(listOfAllActors);
     }
+    sortResultsActors(listOfAllActors);
+    System.out.println("num of all actors combined: " + listOfAllActors.size());
+  }
+
+
+  private void createGenreList(){
+    for (int i = 0; i < movies.size(); i ++)
+    {
+      Movie currentMovie = movies.get(i);
+      String[] currentMovieGenres = currentMovie.getGenres().split("\\|");
+      for (String genreName : currentMovieGenres)
+      {
+        //only for the first movie, create Actor objects for all the cast
+        if (i == 0)
+        {
+          listOfAllGenre.add(new Genre(genreName, currentMovie));
+        }
+        else
+        {
+          boolean added = false;
+          for (int j = 0; j < listOfAllGenre.size(); j++)
+          {
+            //if there's already a Genre object created, add the currentMovie to moviesWithGenre for the genre
+            if (listOfAllGenre.get(j).getName().equals(genreName))
+            {
+              listOfAllGenre.get(j).addMovie(currentMovie);
+              added = true;
+            }
+          }
+          //if genre isn't on the genre list, create a new actor object
+          if (!added)
+          {
+            listOfAllGenre.add(new Genre(genreName, currentMovie));
+          }
+        }
+      }
+    }
+    sortResultsGenre(listOfAllGenre);
+    System.out.println("num of all genres combined: " + listOfAllGenre.size());
   }
 }
