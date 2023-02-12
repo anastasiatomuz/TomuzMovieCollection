@@ -325,10 +325,7 @@ public class MovieCollection {
   }
   
   private void listHighestRated() {
-    ArrayList<Movie> results = new ArrayList<>();
-    for (Movie movie : movies){
-      results.add(movie);
-    }
+    ArrayList<Movie> results = new ArrayList<>(movies);
 
     for (int j = 1; j < results.size(); j++) {
       Movie temp = results.get(j);
@@ -342,20 +339,20 @@ public class MovieCollection {
       results.set(possibleIndex, temp);
     }
 
-    ArrayList<Movie> newLimitedResults = new ArrayList<>();
+    Movie[] top50Ratings = new Movie[50];
     for (int k = 0; k < 50; k ++){
-      newLimitedResults.add(results.get(k));
+      top50Ratings[k] = results.get(k);
     }
 
-    for (int i = 0; i < newLimitedResults.size(); i++) {
-      System.out.println(i + 1 + ". " + newLimitedResults.get(i).getTitle() + " " + newLimitedResults.get(i).getUserRating());
+    for (int i = 0; i < top50Ratings.length; i++) {
+      System.out.println(i + 1 + ". " + top50Ratings[i].getTitle() + ": " + top50Ratings[i].getUserRating());
     }
 
     System.out.println("Which movie would you like to learn more about?");
     System.out.print("Enter number: ");
     int choiceMovie = scanner.nextInt();
     scanner.nextLine();
-    Movie toView = newLimitedResults.get(choiceMovie - 1);
+    Movie toView = top50Ratings[choiceMovie - 1];
     displayMovieInfo(toView);
     System.out.println("\n ** Press Enter to Return to Main Menu **");
     scanner.nextLine();
@@ -363,7 +360,42 @@ public class MovieCollection {
   }
   
   private void listHighestRevenue() {
-    /* TASK 6: IMPLEMENT ME */
+    //copy of movies list
+    ArrayList<Movie> results = new ArrayList<>(movies);
+
+    //orders results list by revenue (greatest to least)
+    for (int j = 1; j < results.size(); j++) {
+      Movie temp = results.get(j);
+      double tempRevenue = temp.getRevenue();
+
+      int possibleIndex = j;
+      while (possibleIndex > 0 && tempRevenue > results.get(possibleIndex - 1).getRevenue()) {
+        results.set(possibleIndex, results.get(possibleIndex - 1));
+        possibleIndex--;
+      }
+      results.set(possibleIndex, temp);
+    }
+
+    //stores only top 50 movies
+    Movie[] top50Revenue = new Movie[50];
+    for (int k = 0; k < 50; k ++){
+      top50Revenue[k] = results.get(k);
+    }
+
+    //prints the top 50
+    for (int i = 0; i < top50Revenue.length; i++) {
+      System.out.println(i + 1 + ". " + top50Revenue[i].getTitle() + ": " + top50Revenue[i].getRevenue());
+    }
+
+    //user picks to learn more about a movie
+    System.out.println("Which movie would you like to learn more about?");
+    System.out.print("Enter number: ");
+    int choiceMovie = scanner.nextInt();
+    scanner.nextLine();
+    Movie toView = top50Revenue[choiceMovie - 1];
+    displayMovieInfo(toView);
+    System.out.println("\n ** Press Enter to Return to Main Menu **");
+    scanner.nextLine();
   }
 
   /*
