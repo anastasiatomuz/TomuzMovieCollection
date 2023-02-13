@@ -436,7 +436,6 @@ public class MovieCollection {
       }
     }
     sortResultsActors(listOfAllActors);
-    System.out.println("num of all actors combined: " + listOfAllActors.size());
   }
 
 
@@ -473,6 +472,5 @@ public class MovieCollection {
       }
     }
     sortResultsGenre(listOfAllGenre);
-    System.out.println("num of all genres combined: " + listOfAllGenre.size());
   }
 }
